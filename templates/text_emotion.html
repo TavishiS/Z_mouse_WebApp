@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text to Emotion Analysis</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; line-height: 1.6; }
+        textarea { width: 100%; height: 100px; margin-bottom: 10px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background-color: #0056b3; }
+        #results { margin-top: 20px; white-space: pre-wrap; background-color: #f8f9fa; padding: 15px; border: 1px solid #dee2e6; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Text to Emotion Analysis</h1>
+    <p>Enter some text below and click "Analyze" to see the emotion scores.</p>
+    <textarea id="text-input" placeholder="For example: I am so happy today!"></textarea>
+    <button id="analyze-btn">Analyze</button>
+    <div id="results">
+        <!-- Results will be displayed here -->
+    </div>
+    <script src="{{ url_for('static', filename='text_emotion.js') }}"></script>
+</body>
+</html>

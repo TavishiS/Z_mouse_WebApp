@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, render_template
-import math
+from text_to_emo import emotion_dict
 
 app = Flask(__name__)
 
@@ -18,9 +18,9 @@ def get_closest_emotion(angle):
     return angle_emotion_map[closest]
 
 def get_certainty_label(hold_time):
-    if hold_time >= 15:
+    if hold_time >= 2:
         return "very sure", 1.0
-    elif hold_time >= 7:
+    elif hold_time >= 1:
         return "sure", 0.66
     else:
         return "uncertain", 0.33
@@ -42,5 +42,18 @@ def process():
         "certainty_score": score
     })
 
+@app.route("/text_emotion")
+def text_emotion_page():
+    return render_template("text_emotion.html")
+
+@app.route("/text_to_emo", methods=["POST"])
+def text_to_emo():
+    text = request.json.get("text", "")
+    if not text:
+        return jsonify({"error": "No text provided"}), 400
+    results = emotion_dict(text)
+    return jsonify(results)
+
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5000, host="0.0.0.0", threaded=True)

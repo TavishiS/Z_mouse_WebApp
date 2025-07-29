@@ -20,12 +20,11 @@ classifier = pipeline(
 def emotion_dict(text):
     # Classify a sentence
     results = classifier(text)
-    return results
+    # Convert the result into a more friendly dictionary format
+    return {item['label']: round(item['score'] * 100, 2) for item in results[0]}
 
 if __name__ == "__main__":
     text = "I am so happy today! The sun is shining and everything feels great."
     results = emotion_dict(text)
-    # Convert the result into the desired dictionary format
-    emotion_percentages = {item['label']: round(item['score'] * 100, 2) for item in results[0]}
-    # Print only the final dictionary
-    print(emotion_percentages)
+    # The result is already the desired dictionary format.
+    print(results)

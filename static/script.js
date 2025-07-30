@@ -143,19 +143,31 @@ canvas.addEventListener("mousedown", () => {
 canvas.addEventListener("mouseup", () => {
   const holdTime = (Date.now() - startTime) / 1000;
   
+  const emotionDisplay = document.getElementById("emotion-display");
+  const certaintyDisplay = document.getElementById("certainty-display");
+
+
   fetch("/process", {
     method: "POST",
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ angle: lockedAngle, hold_time: holdTime })
   })
-  .then(res => res.json())
+  .then(res => {
+    if (!res.ok) {
+      throw new Error(`Server responded with status: ${res.status}`);
+    }
+    return res.json();
+  })
   .then(data => {
-    document.getElementById("emotion-display").textContent = data.emotion;
-    
-    const certaintyDisplay = document.getElementById("certainty-display");
+    emotionDisplay.textContent = data.emotion;
     certaintyDisplay.textContent = data.certainty_label;
     certaintyDisplay.className = "certainty-result";
     certaintyDisplay.classList.add(`certainty-${data.certainty_label.replace(/\s+/g, '-').toLowerCase()}`);
+  })
+  .catch(error => {
+    console.error('Error during fetch:', error);
+    emotionDisplay.textContent = 'Error';
+    certaintyDisplay.textContent = 'Could not get result.';
   });
   
   locked = false;

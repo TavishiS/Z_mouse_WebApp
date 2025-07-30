@@ -11,7 +11,6 @@
     button:hover { background:#0056b3; }
     #results { margin-top:20px; white-space:pre-wrap; background:#f8f9fa; padding:15px; border:1px solid #dee2e6; border-radius:5px; }
   </style>
-  <!-- load Chart.js before your own script -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -19,7 +18,9 @@
   <textarea id="text-input" placeholder="I am so happy today!"></textarea>
   <button id="analyze-btn">Analyze</button>
   <div id="results"></div>
-  <!-- now load your JS with the correct Flask‐generated URL -->
+  <div id="chart-container">
+    <canvas id="emotion-chart"></canvas>
+  </div>
   <script src="{{ url_for('static', filename='text_emotion.js') }}"></script>
 </body>
 </html>

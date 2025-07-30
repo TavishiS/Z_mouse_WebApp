@@ -25,7 +25,7 @@ def get_certainty_label(hold_time):
     else:
         return "uncertain", 0.33
 
-@app.route("/")
+@app.route("/circumplex_model")
 def home():
     return render_template("index.html")
 
@@ -42,7 +42,7 @@ def process():
         "certainty_score": score
     })
 
-@app.route("/text_emotion")
+@app.route("/")
 def text_emotion_page():
     return render_template("text_emotion.html")
 

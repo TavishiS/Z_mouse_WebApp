@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, render_template
-from text_to_emo import emotion_dict
+from text_to_emo import get_emotion_scores_for_models
 
 app = Flask(__name__)
 
@@ -51,8 +51,8 @@ def text_to_emo():
     text = request.json.get("text", "")
     if not text:
         return jsonify({"error": "No text provided"}), 400
-    results = emotion_dict(text)
-    return jsonify(results)
+    all_results = get_emotion_scores_for_models(text)
+    return jsonify(all_results)
 
 
 if __name__ == "__main__":

@@ -33,7 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let chart1 = null;
   let chart2 = null;
-  let analysisData = null;
+  let analysisDataModel1 = null; // Store data for Model 1
+  let analysisDataModel2 = null; // Store data for Model 2
 
   
 
@@ -45,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     model1ScoresDiv.textContent = 'Analyzing…';
-    model2ScoresDiv.textContent = '';
+    model2ScoresDiv.textContent = 'Analyzing…';
     gaugeWrap.innerHTML = '';
     feedbackSection.style.display = 'none';
 
@@ -63,30 +64,28 @@ document.addEventListener('DOMContentLoaded', () => {
         const err = await resp.json().catch(() => ({}));
         throw new Error(err.error || `HTTP ${resp.status}`);
       }
-      const data = await resp.json();
+      const allData = await resp.json(); // This now contains {model1: {...}, model2: {...}}
 
-      let others = 0,
-        filtered = {};
-      for (const [lab, sc] of Object.entries(data)) {
-        sc < 3 ? others += sc: filtered[lab] = sc;
+      // --- Process Model 1 Data ---
+      let others1 = 0,
+        filtered1 = {};
+      for (const [lab, sc] of Object.entries(allData.model1)) {
+        sc < 3 ? others1 += sc: filtered1[lab] = sc;
       }
-      if (others) filtered.Others = others;
+      if (others1) filtered1.Others = others1;
+      const sorted1 = Object.entries(filtered1).sort((a, b) => b[1] - a[1]);
+      analysisDataModel1 = sorted1;
 
-      const sorted = Object.entries(filtered).sort((a, b) => b[1] - a[1]);
-      analysisData = sorted;
+      const scoreText1 = 'Emotion Scores:\n\n' +
+        sorted1.map(([l, s]) => `${l}: ${s.toFixed(1)}%`).join('\n');
+      model1ScoresDiv.textContent = scoreText1;
 
-      const scoreText = 'Emotion Scores:\n\n' +
-        sorted.map(([l, s]) => `${l}: ${s.toFixed(1)}%`).join('\n');
-      
-      model1ScoresDiv.textContent = scoreText;
-      model2ScoresDiv.textContent = scoreText;
+      const labels1 = sorted1.map(([l]) => l);
+      const values1 = sorted1.map(([, s]) => s);
 
-      const labels = sorted.map(([l]) => l);
-      const values = sorted.map(([, s]) => s);
-
-      const dataset = {
-        data: values,
-        backgroundColor: labels.map(l => emotionColors[l] || getRandomColor(0.2)),
+      const dataset1 = {
+        data: values1,
+        backgroundColor: labels1.map(l => emotionColors[l] || getRandomColor(0.2)),
         borderColor: '#555',
         borderWidth: 1.5
       };
@@ -97,39 +96,63 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       if (chart1) {
-        chart1.data.labels = labels;
-        chart1.data.datasets[0] = dataset;
+        chart1.data.labels = labels1;
+        chart1.data.datasets[0] = dataset1;
         chart1.update();
       } else {
-        chart1 = new Chart(ctx1, { type: 'pie', data: { labels, datasets: [dataset] }, options: chartOptions });
+        chart1 = new Chart(ctx1, { type: 'pie', data: { labels: labels1, datasets: [dataset1] }, options: chartOptions });
       }
 
+      // --- Process Model 2 Data ---
+      let others2 = 0,
+        filtered2 = {};
+      for (const [lab, sc] of Object.entries(allData.model2)) {
+        sc < 3 ? others2 += sc: filtered2[lab] = sc;
+      }
+      if (others2) filtered2.Others = others2;
+      const sorted2 = Object.entries(filtered2).sort((a, b) => b[1] - a[1]);
+      analysisDataModel2 = sorted2;
+
+      const scoreText2 = 'Emotion Scores:\n\n' +
+        sorted2.map(([l, s]) => `${l}: ${s.toFixed(1)}%`).join('\n');
+      model2ScoresDiv.textContent = scoreText2;
+
+      const labels2 = sorted2.map(([l]) => l);
+      const values2 = sorted2.map(([, s]) => s);
+
+      const dataset2 = {
+        data: values2,
+        backgroundColor: labels2.map(l => emotionColors[l] || getRandomColor(0.2)),
+        borderColor: '#555',
+        borderWidth: 1.5
+      };
+
       if (chart2) {
-        chart2.data.labels = labels;
-        chart2.data.datasets[0] = dataset;
+        chart2.data.labels = labels2;
+        chart2.data.datasets[0] = dataset2;
         chart2.update();
       } else {
-        chart2 = new Chart(ctx2, { type: 'pie', data: { labels, datasets: [dataset] }, options: chartOptions });
+        chart2 = new Chart(ctx2, { type: 'pie', data: { labels: labels2, datasets: [dataset2] }, options: chartOptions });
       }
 
       feedbackSection.style.display = 'block';
 
     } catch (err) {
       console.error(err);
-      resultsDiv.textContent = `An error occurred: ${err.message}`;
+      model1ScoresDiv.textContent = `An error occurred: ${err.message}`;
+      model2ScoresDiv.textContent = '';
     }
   });
 
   showGaugesBtn.addEventListener('click', () => {
-    if (!analysisData) return;
+    if (!analysisDataModel1 || !analysisDataModel2) return;
 
-    // In the future, you would have different data for each model.
-    // For now, we use the same `analysisData` regardless of choice.
     const chosenModel = document.querySelector('input[name="model-choice"]:checked').value;
+    const dataForGauges = (chosenModel === '1') ? analysisDataModel1 : analysisDataModel2;
     console.log(`User chose model ${chosenModel}`);
 
     gaugeWrap.innerHTML = '';
-    analysisData.slice(0, 2).forEach(([lab]) => {
+    dataForGauges.slice(0, 2).forEach(([lab]) => {
       const rgb = (emotionColors[lab] || getRandomColor(0.2))
         .match(/rgba?(\((\d+),\s*(\d+),\s*(\d+))/)
         .slice(1, 4).join(',');

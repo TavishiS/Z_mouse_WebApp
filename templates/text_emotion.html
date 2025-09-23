@@ -6,16 +6,19 @@
   <title>Text → Emotion Analysis</title>
 
   <style>
-    body         { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
-                   max-width:600px;margin:auto;padding:20px; }
-    textarea     { width:100%;height:100px;margin-bottom:10px;padding:8px;
-                   border:1px solid #ccc;border-radius:4px; }
-    button       { padding:10px 15px;background:#007bff;color:#fff;border:none;
-                   border-radius:4px;cursor:pointer; }
-    button:hover { background:#0056b3; }
-    #results     { margin-top:20px;white-space:pre-wrap;background:#f8f9fa;
-                   padding:15px;border:1px solid #dee2e6;border-radius:5px; }
-    #top-emotions{ display:flex;gap:40px;justify-content:center;margin-top:30px; }
+    body          { font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+                    max-width:800px;margin:auto;padding:20px; }
+    textarea      { width:100%;height:100px;margin-bottom:10px;padding:8px;
+                    border:1px solid #ccc;border-radius:4px; }
+    button        { padding:10px 15px;background:#007bff;color:#fff;border:none;
+                    border-radius:4px;cursor:pointer; }
+    button:hover  { background:#0056b3; }
+    #results      { margin-top:20px;white-space:pre-wrap;background:#f8f9fa;
+                    padding:15px;border:1px solid #dee2e6;border-radius:5px; }
+    #charts-container { display:flex;gap:20px;justify-content:center;margin-top:20px; }
+    .chart-wrapper  { width: 48%; }
+    #feedback-section { margin-top:20px; padding:15px; background:#f0f0f0; border-radius:5px; text-align:center; }
+    #top-emotions { display:flex;gap:40px;justify-content:center;margin-top:30px; }
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -29,11 +32,25 @@
 
   <div id="results"></div>
 
-  <div id="chart-container">
-    <canvas id="emotion-chart"></canvas>
+  <div id="charts-container">
+    <div class="chart-wrapper">
+      <h3>Model 1</h3>
+      <canvas id="emotion-chart-1"></canvas>
+    </div>
+    <div class="chart-wrapper">
+      <h3>Model 2</h3>
+      <canvas id="emotion-chart-2"></canvas>
+    </div>
   </div>
 
-  <!-- *** NEW: placeholder for the two interactive gauges *** -->
+  <div id="feedback-section" style="display:none;">
+    <h3>Which model best matched your feelings?</h3>
+    <label><input type="radio" name="model-choice" value="1" checked> Model 1</label>
+    <label><input type="radio" name="model-choice" value="2"> Model 2</label>
+    <br><br>
+    <button id="show-gauges-btn">Show Surity Gauges</button>
+  </div>
+
   <div id="top-emotions"></div>
 
   <script type="module" src="{{ url_for('static', filename='text_emotion.js') }}"></script>

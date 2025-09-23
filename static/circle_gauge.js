@@ -1,9 +1,40 @@
-/* Canvas gauge that fills while the user presses & holds. */
+/*
+Canvas gauge that can be adjusted with left/right clicks.
+The color lightness/darkness is based on the surity percentage.
+*/
+
+// Helper to convert RGB color string to HSL
+function rgbToHsl(rgbString) {
+  const [r, g, b] = rgbString.split(',').map(Number);
+  const r_norm = r / 255;
+  const g_norm = g / 255;
+  const b_norm = b / 255;
+
+  const max = Math.max(r_norm, g_norm, b_norm);
+  const min = Math.min(r_norm, g_norm, b_norm);
+  let h = 0, s = 0, l = (max + min) / 2;
+
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r_norm: h = (g_norm - b_norm) / d + (g_norm < b_norm ? 6 : 0); break;
+      case g_norm: h = (b_norm - r_norm) / d + 2; break;
+      case b_norm: h = (r_norm - g_norm) / d + 4; break;
+    }
+    h /= 6;
+  }
+
+  return [h * 360, s * 100, l * 100];
+}
+
 export function buildGauge(container, label, baseRGB) {
   const SIZE = 140;
-  const cvs  = Object.assign(document.createElement('canvas'),
-                             { width: SIZE, height: SIZE });
-  const ctx  = cvs.getContext('2d');
+  const cvs = Object.assign(document.createElement('canvas'), {
+    width: SIZE,
+    height: SIZE
+  });
+  const ctx = cvs.getContext('2d');
   container.appendChild(cvs);
 
   const cap = document.createElement('div');
@@ -12,46 +43,57 @@ export function buildGauge(container, label, baseRGB) {
   cap.style.marginTop = '6px';
   container.appendChild(cap);
 
-  let rafId, startT;
+  let surity = 100;
+  const [hue, initialSaturation] = rgbToHsl(baseRGB);
 
-  function draw(deg) {
+  // Ensure a minimum saturation to avoid pure grey, unless it's a truly achromatic color
+  const saturation = Math.max(initialSaturation, 30); // Minimum 30% saturation
+
+  function draw() {
+    const deg = surity * 3.6;
+    // Adjust lightness range: 50 (surity 100) to 90 (surity 0)
+    const currentLightness = 90 - (surity / 100) * 40;
+
     ctx.clearRect(0, 0, SIZE, SIZE);
-
     ctx.lineWidth = 16;
-    ctx.strokeStyle = `rgba(${baseRGB},0.25)`;
+
+    // Background ring (unfilled part) - slightly lighter than the currentLightness
+    const backgroundLightness = Math.min(95, currentLightness + 10); // Max 95% lightness
+    ctx.strokeStyle = `hsl(${hue}, ${saturation}%, ${backgroundLightness}%)`;
     ctx.beginPath();
-    ctx.arc(SIZE/2, SIZE/2, SIZE/2 - 10, 0, 2 * Math.PI);
+    ctx.arc(SIZE / 2, SIZE / 2, SIZE / 2 - 10, 0, 2 * Math.PI);
     ctx.stroke();
 
+    // Foreground (surity) ring (filled part)
     if (deg > 0) {
-      ctx.strokeStyle = `rgb(${baseRGB})`;
+      ctx.strokeStyle = `hsl(${hue}, ${saturation}%, ${currentLightness}%)`;
       ctx.beginPath();
-      ctx.arc(SIZE/2, SIZE/2, SIZE/2 - 10, -Math.PI/2,
-              -Math.PI/2 + deg * Math.PI / 180);
+      ctx.arc(SIZE / 2, SIZE / 2, SIZE / 2 - 10, -Math.PI / 2, -Math.PI / 2 + deg * Math.PI / 180);
       ctx.stroke();
     }
 
-    ctx.fillStyle = '#333';
+    // Text color - ensure it's always readable and not too dark
+    const textColorLightness = Math.max(20, currentLightness - 40); // Min 20% lightness
+    ctx.fillStyle = `hsl(${hue}, ${saturation}%, ${textColorLightness}%)`;
     ctx.font = '600 18px system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(`${Math.round(deg / 3.6)}%`, SIZE/2, SIZE/2);
+    ctx.fillText(`${surity}%`, SIZE / 2, SIZE / 2);
   }
 
-  function animate(ts) {
-    if (!startT) startT = ts;
-    const pct = Math.min((ts - startT) / 2000, 1);   // full in 2 s
-    draw(pct * 360);
-    if (pct < 1) rafId = requestAnimationFrame(animate);
-  }
-
-  cvs.addEventListener('mousedown', () => {
-    cancelAnimationFrame(rafId);
-    startT = null;
-    rafId  = requestAnimationFrame(animate);
+  // Left-click to decrease
+  cvs.addEventListener('click', (e) => {
+    e.preventDefault();
+    surity = Math.max(0, surity - 5);
+    draw();
   });
-  ['mouseup', 'mouseleave'].forEach(ev =>
-    cvs.addEventListener(ev, () => cancelAnimationFrame(rafId)));
 
-  draw(0);
+  // Right-click to increase
+  cvs.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    surity = Math.min(100, surity + 5);
+    draw();
+  });
+
+  draw();
 }

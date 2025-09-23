@@ -19,6 +19,7 @@
     .chart-wrapper  { width: 48%; }
     #feedback-section { margin-top:20px; padding:15px; background:#f0f0f0; border-radius:5px; text-align:center; }
     #top-emotions { display:flex;gap:40px;justify-content:center;margin-top:30px; }
+    .emotion-scores { margin-bottom: 10px; white-space: pre-wrap; background: #f8f9fa; padding: 10px; border: 1px solid #dee2e6; border-radius: 5px; font-size: 0.9em; text-align: left; min-height: 100px; overflow-y: auto; }
   </style>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -30,15 +31,15 @@
   <textarea id="text-input" placeholder="I am so happy today!"></textarea>
   <button   id="analyze-btn">Analyze</button>
 
-  <div id="results"></div>
-
   <div id="charts-container">
     <div class="chart-wrapper">
       <h3>Model 1</h3>
+      <div id="model1-scores" class="emotion-scores"></div>
       <canvas id="emotion-chart-1"></canvas>
     </div>
     <div class="chart-wrapper">
       <h3>Model 2</h3>
+      <div id="model2-scores" class="emotion-scores"></div>
       <canvas id="emotion-chart-2"></canvas>
     </div>
   </div>

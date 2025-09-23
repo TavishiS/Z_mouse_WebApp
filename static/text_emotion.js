@@ -23,7 +23,8 @@ const emotionColors = {
 document.addEventListener('DOMContentLoaded', () => {
   const textInput = document.getElementById('text-input');
   const analyzeBtn = document.getElementById('analyze-btn');
-  const resultsDiv = document.getElementById('results');
+  const model1ScoresDiv = document.getElementById('model1-scores');
+  const model2ScoresDiv = document.getElementById('model2-scores');
   const ctx1 = document.getElementById('emotion-chart-1').getContext('2d');
   const ctx2 = document.getElementById('emotion-chart-2').getContext('2d');
   const gaugeWrap = document.getElementById('top-emotions');
@@ -39,10 +40,12 @@ document.addEventListener('DOMContentLoaded', () => {
   analyzeBtn.addEventListener('click', async () => {
     const text = textInput.value.trim();
     if (!text) {
-      resultsDiv.textContent = 'Please enter some text to analyze.';
+      model1ScoresDiv.textContent = 'Please enter some text to analyze.';
+      model2ScoresDiv.textContent = '';
       return;
     }
-    resultsDiv.textContent = 'Analyzing…';
+    model1ScoresDiv.textContent = 'Analyzing…';
+    model2ScoresDiv.textContent = '';
     gaugeWrap.innerHTML = '';
     feedbackSection.style.display = 'none';
 
@@ -72,8 +75,11 @@ document.addEventListener('DOMContentLoaded', () => {
       const sorted = Object.entries(filtered).sort((a, b) => b[1] - a[1]);
       analysisData = sorted;
 
-      resultsDiv.textContent = 'Emotion Scores:\n\n' +
+      const scoreText = 'Emotion Scores:\n\n' +
         sorted.map(([l, s]) => `${l}: ${s.toFixed(1)}%`).join('\n');
+      
+      model1ScoresDiv.textContent = scoreText;
+      model2ScoresDiv.textContent = scoreText;
 
       const labels = sorted.map(([l]) => l);
       const values = sorted.map(([, s]) => s);

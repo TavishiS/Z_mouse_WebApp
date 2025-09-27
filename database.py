@@ -16,4 +16,4 @@ def insert_entry(model_no, surity):
     }
 
     collection.insert_one(doc)
-    print("Inserted entry : ", doc) 
+    print("Inserted entry : ", doc)

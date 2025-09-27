@@ -72,8 +72,11 @@ def submit_feedback():
     print("Model selected:", model_selected)
     print("Surity settings:", surity_settings)
 
-    # Later: you can forward this data to database.py
-    return jsonify({"status": "success", "message": "Surity settings received"})
+    try:
+        database.insert_entry(model_selected, surity_settings)
+        return jsonify({"message": "Submission saved successfully!"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == "__main__":

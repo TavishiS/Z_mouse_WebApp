@@ -52,13 +52,13 @@ export function buildGauge(container, label, baseRGB) {
   function draw() {
     const deg = surity * 3.6;
     // Adjust lightness range: 50 (surity 100) to 90 (surity 0)
-    const currentLightness = 90 - (surity / 100) * 40;
+    const currentLightness = 100 - (surity / 100) * 40;
 
     ctx.clearRect(0, 0, SIZE, SIZE);
     ctx.lineWidth = 16;
 
     // Background ring (unfilled part) - slightly lighter than the currentLightness
-    const backgroundLightness = Math.min(95, currentLightness + 10); // Max 95% lightness
+    const backgroundLightness = Math.min(100, currentLightness + 10); // Max 95% lightness
     ctx.strokeStyle = `hsl(${hue}, ${saturation}%, ${backgroundLightness}%)`;
     ctx.beginPath();
     ctx.arc(SIZE / 2, SIZE / 2, SIZE / 2 - 10, 0, 2 * Math.PI);
@@ -66,7 +66,7 @@ export function buildGauge(container, label, baseRGB) {
 
     // Foreground (surity) ring (filled part)
     if (deg > 0) {
-      ctx.strokeStyle = `hsl(${hue}, ${saturation}%, ${currentLightness}%)`;
+      ctx.strokeStyle = `hsl(${hue}, ${saturation}%, ${currentLightness-30}%)`;
       ctx.beginPath();
       ctx.arc(SIZE / 2, SIZE / 2, SIZE / 2 - 10, -Math.PI / 2, -Math.PI / 2 + deg * Math.PI / 180);
       ctx.stroke();

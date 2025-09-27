@@ -9,14 +9,14 @@ function getRandomColor(alpha) {
 }
 
 const emotionColors = {
-  joy: 'rgba(255,255,0,0.2)',
-  surprise: 'rgba(255,165,0,0.2)',
-  sadness: 'rgba(0,0,255,0.2)',
-  neutral: 'rgba(128,128,128,0.2)',
-  anger: 'rgba(255,0,0,0.2)',
-  disgust: 'rgba(0,128,0,0.2)',
-  fear: 'rgba(128,0,128,0.2)',
-  Others: 'rgba(0,0,0,0.2)'
+  joy: 'rgba(255,255,0,0.4)',
+  surprise: 'rgba(255,165,0,0.4)',
+  sadness: 'rgba(0,0,255,0.4)',
+  neutral: 'rgba(128,128,128,0.4)',
+  anger: 'rgba(255,0,0,0.4)',
+  disgust: 'rgba(0,128,0,0.4)',
+  fear: 'rgba(128,0,128,0.4)',
+  Others: 'rgba(0,0,0,0.4)'
 };
 
 /* ---------- main ---------- */
@@ -134,7 +134,8 @@ document.addEventListener('DOMContentLoaded', () => {
     submitChoiceBtn.style.display = 'none';
 
     // Show the gauges button
-    showGaugesBtn.style.display = 'inline-block';
+    // showGaugesBtn.style.display = 'inline-block';
+    showGaugesBtn.click();
   });
 
   /* ---- Show Surity Gauges ---- */
@@ -189,6 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .catch(err => console.error(err));
         submitSurityBtn.style.display = 'none';
+        document.getElementById('thank-you-msg').style.display = 'inline-block';
     })
 
   });

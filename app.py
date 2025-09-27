@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify, render_template
 from text_to_emo import get_emotion_scores_for_models
+import database
 
 app = Flask(__name__)
 

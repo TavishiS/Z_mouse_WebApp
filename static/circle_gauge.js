@@ -81,19 +81,50 @@ export function buildGauge(container, label, baseRGB) {
     ctx.fillText(`${surity}%`, SIZE / 2, SIZE / 2);
   }
 
-  // Left-click to decrease
-  cvs.addEventListener('click', (e) => {
-    e.preventDefault();
-    surity = Math.max(0, surity - 5);
-    draw();
-  });
 
-  // Right-click to increase
-  cvs.addEventListener('contextmenu', (e) => {
-    e.preventDefault();
-    surity = Math.min(100, surity + 5);
-    draw();
-  });
+  //..........mouse hold instead of click......... */
+  let intervalId = null;   // will hold our repeating timer
 
-  draw();
+function startAdjust(direction) {
+  // direction: -1 for decrease, +1 for increase
+  if (intervalId) return;  // already running
+  intervalId = setInterval(() => {
+    if (direction === -1) {
+      surity = Math.max(0, surity - 1); // decrease slowly
+    } else {
+      surity = Math.min(100, surity + 1); // increase slowly
+    }
+    draw();
+  }, 50); // adjust speed (50 ms = 20 steps/sec)
+}
+
+function stopAdjust() {
+  clearInterval(intervalId);
+  intervalId = null;
+}
+
+// Left mouse hold → decrease
+cvs.addEventListener('mousedown', e => {
+  if (e.button === 0) {          // 0 = left button
+    e.preventDefault();
+    startAdjust(-1);
+  }
+});
+
+// Right mouse hold → increase
+cvs.addEventListener('mousedown', e => {
+  if (e.button === 2) {          // 2 = right button
+    e.preventDefault();
+    startAdjust(1);
+  }
+});
+
+// Stop on mouseup or when pointer leaves canvas
+cvs.addEventListener('mouseup', stopAdjust);
+cvs.addEventListener('mouseleave', stopAdjust);
+
+// Prevent context menu on right-click
+cvs.addEventListener('contextmenu', e => e.preventDefault());
+
+draw();
 }

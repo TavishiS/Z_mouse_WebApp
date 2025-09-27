@@ -45,11 +45,15 @@
   </div>
 
   <div id="feedback-section" style="display:none;">
-    <h3>Which model best matched your feelings?</h3>
-    <label><input type="radio" name="model-choice" value="1" checked> Model 1</label>
+    <h3 id="question">Which model best matched your feelings?</h3>
+    <label><input type="radio" name="model-choice" value="1"> Model 1</label>
     <label><input type="radio" name="model-choice" value="2"> Model 2</label>
     <br><br>
-    <button id="show-gauges-btn">Show Surity Gauges</button>
+
+    <button id="submit-choice-btn">Submit model choice</button>
+    <p id="selected-model" style="display:none; font-weight:bold; font-size:2em; color:#2c5a0e; text-align:center; margin-top:10px; margin-bottom:10px; font-family:-apple-system,BlinkMacSystemFont">Selected model</p>
+    <br><br>
+    <button id="show-gauges-btn" style="display:none;">Show Surity Gauges</button>
   </div>
 
   <div id="top-emotions"></div>

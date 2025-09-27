@@ -21,23 +21,25 @@ const emotionColors = {
 
 /* ---------- main ---------- */
 document.addEventListener('DOMContentLoaded', () => {
-  const textInput = document.getElementById('text-input');
-  const analyzeBtn = document.getElementById('analyze-btn');
+  const textInput       = document.getElementById('text-input');
+  const analyzeBtn      = document.getElementById('analyze-btn');
   const model1ScoresDiv = document.getElementById('model1-scores');
   const model2ScoresDiv = document.getElementById('model2-scores');
-  const ctx1 = document.getElementById('emotion-chart-1').getContext('2d');
-  const ctx2 = document.getElementById('emotion-chart-2').getContext('2d');
-  const gaugeWrap = document.getElementById('top-emotions');
+  const ctx1            = document.getElementById('emotion-chart-1').getContext('2d');
+  const ctx2            = document.getElementById('emotion-chart-2').getContext('2d');
+  const gaugeWrap       = document.getElementById('top-emotions');
   const feedbackSection = document.getElementById('feedback-section');
-  const showGaugesBtn = document.getElementById('show-gauges-btn');
+  const submitChoiceBtn = document.getElementById('submit-choice-btn');
+  const showGaugesBtn   = document.getElementById('show-gauges-btn');
+  const model_question = document.getElementById('question');
 
   let chart1 = null;
   let chart2 = null;
-  let analysisDataModel1 = null; // Store data for Model 1
-  let analysisDataModel2 = null; // Store data for Model 2
+  let analysisDataModel1 = null;
+  let analysisDataModel2 = null;
+  let chosenModel = null; // store user's model selection
 
-  
-
+  /* ---- Analyze Text ---- */
   analyzeBtn.addEventListener('click', async () => {
     const text = textInput.value.trim();
     if (!text) {
@@ -45,98 +47,41 @@ document.addEventListener('DOMContentLoaded', () => {
       model2ScoresDiv.textContent = '';
       return;
     }
+
+    // Reset UI
     model1ScoresDiv.textContent = 'Analyzing…';
     model2ScoresDiv.textContent = 'Analyzing…';
     gaugeWrap.innerHTML = '';
     feedbackSection.style.display = 'none';
+    showGaugesBtn.style.display = 'none';
 
     try {
       const resp = await fetch('/text_to_emo', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          text
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
       });
+
       if (!resp.ok) {
         const err = await resp.json().catch(() => ({}));
         throw new Error(err.error || `HTTP ${resp.status}`);
       }
-      const allData = await resp.json(); // This now contains {model1: {...}, model2: {...}}
 
-      // --- Process Model 1 Data ---
-      let others1 = 0,
-        filtered1 = {};
-      for (const [lab, sc] of Object.entries(allData.model1)) {
-        sc < 3 ? others1 += sc: filtered1[lab] = sc;
-      }
-      if (others1) filtered1.Others = others1;
-      const sorted1 = Object.entries(filtered1).sort((a, b) => b[1] - a[1]);
+      const allData = await resp.json(); // {model1: {...}, model2: {...}}
+
+      // --- Process Model 1 ---
+      const sorted1 = processModelData(allData.model1);
       analysisDataModel1 = sorted1;
+      model1ScoresDiv.textContent = formatScores(sorted1);
+      chart1 = updatePieChart(chart1, ctx1, sorted1);
 
-      const scoreText1 = 'Emotion Scores:\n\n' +
-        sorted1.map(([l, s]) => `${l}: ${s.toFixed(1)}%`).join('\n');
-      model1ScoresDiv.textContent = scoreText1;
-
-      const labels1 = sorted1.map(([l]) => l);
-      const values1 = sorted1.map(([, s]) => s);
-
-      const dataset1 = {
-        data: values1,
-        backgroundColor: labels1.map(l => emotionColors[l] || getRandomColor(0.2)),
-        borderColor: '#555',
-        borderWidth: 1.5
-      };
-
-      const chartOptions = {
-          responsive: true,
-          plugins: { legend: { position:'bottom' } }
-      };
-
-      if (chart1) {
-        chart1.data.labels = labels1;
-        chart1.data.datasets[0] = dataset1;
-        chart1.update();
-      } else {
-        chart1 = new Chart(ctx1, { type: 'pie', data: { labels: labels1, datasets: [dataset1] }, options: chartOptions });
-      }
-
-      // --- Process Model 2 Data ---
-      let others2 = 0,
-        filtered2 = {};
-      for (const [lab, sc] of Object.entries(allData.model2)) {
-        sc < 3 ? others2 += sc: filtered2[lab] = sc;
-      }
-      if (others2) filtered2.Others = others2;
-      const sorted2 = Object.entries(filtered2).sort((a, b) => b[1] - a[1]);
+      // --- Process Model 2 ---
+      const sorted2 = processModelData(allData.model2);
       analysisDataModel2 = sorted2;
-
-      const scoreText2 = 'Emotion Scores:\n\n' +
-        sorted2.map(([l, s]) => `${l}: ${s.toFixed(1)}%`).join('\n');
-      model2ScoresDiv.textContent = scoreText2;
-
-      const labels2 = sorted2.map(([l]) => l);
-      const values2 = sorted2.map(([, s]) => s);
-
-      const dataset2 = {
-        data: values2,
-        backgroundColor: labels2.map(l => emotionColors[l] || getRandomColor(0.2)),
-        borderColor: '#555',
-        borderWidth: 1.5
-      };
-
-      if (chart2) {
-        chart2.data.labels = labels2;
-        chart2.data.datasets[0] = dataset2;
-        chart2.update();
-      } else {
-        chart2 = new Chart(ctx2, { type: 'pie', data: { labels: labels2, datasets: [dataset2] }, options: chartOptions });
-      }
+      model2ScoresDiv.textContent = formatScores(sorted2);
+      chart2 = updatePieChart(chart2, ctx2, sorted2);
 
       feedbackSection.style.display = 'block';
-
     } catch (err) {
       console.error(err);
       model1ScoresDiv.textContent = `An error occurred: ${err.message}`;
@@ -144,17 +89,53 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  /* ---- Submit User's Model Choice ---- */
+  submitChoiceBtn.addEventListener('click', () => {
+    const selected = document.querySelector('input[name="model-choice"]:checked');
+    if (!selected) {
+      alert('Please select a model before submitting.');
+      return;
+    }
+
+    const tempChoice = selected.value;
+    // ✅ Ask for confirmation
+    const confirmChoice = confirm(`Are you sure you want to select Model ${tempChoice}?`);
+    if (!confirmChoice) return;
+
+    // ✅ If confirmed, lock the choice
+    chosenModel = tempChoice;
+    // alert(`You confirmed Model ${chosenModel} as your choice.`);
+    // document.createElement('div').textContent = `You confirmed Model ${chosenModel} as your choice.`;
+
+    // ✅ Display selected model
+    const selectedModel = document.getElementById('selected-model');
+    selectedModel.textContent = `You selected Model ${chosenModel}`;
+    selectedModel.style.display = 'inline-block';
+    // Hide radio buttons and submit button so user cannot change
+    model_question.style.display = 'none';
+    document.querySelectorAll('input[name="model-choice"]').forEach(r => {
+      r.closest('label').style.display = 'none';
+    });
+    submitChoiceBtn.style.display = 'none';
+
+    // Show the gauges button
+    showGaugesBtn.style.display = 'inline-block';
+  });
+
+  /* ---- Show Surity Gauges ---- */
   showGaugesBtn.addEventListener('click', () => {
-    if (!analysisDataModel1 || !analysisDataModel2) return;
+    if (!chosenModel) {
+      alert('Please submit your model choice first.');
+      return;
+    }
 
-    const chosenModel = document.querySelector('input[name="model-choice"]:checked').value;
-    const dataForGauges = (chosenModel === '1') ? analysisDataModel1 : analysisDataModel2;
-    console.log(`User chose model ${chosenModel}`);
-
+    const dataForGauges = chosenModel === '1' ? analysisDataModel1 : analysisDataModel2;
     gaugeWrap.innerHTML = '';
+
+    // Show top 2 emotions
     dataForGauges.slice(0, 2).forEach(([lab]) => {
       const rgb = (emotionColors[lab] || getRandomColor(0.2))
-        .match(/rgba?(\((\d+),\s*(\d+),\s*(\d+))/)
+        .match(/\((\d+),\s*(\d+),\s*(\d+)/)
         .slice(1, 4).join(',');
       const holder = document.createElement('div');
       holder.style.display = 'flex';
@@ -164,5 +145,39 @@ document.addEventListener('DOMContentLoaded', () => {
       buildGauge(holder, lab, rgb);
     });
   });
-});
 
+  /* ---- Helper Functions ---- */
+  function processModelData(modelData) {
+    let others = 0;
+    const filtered = {};
+    for (const [lab, sc] of Object.entries(modelData)) {
+      sc < 3 ? others += sc : filtered[lab] = sc;
+    }
+    if (others) filtered.Others = others;
+    return Object.entries(filtered).sort((a, b) => b[1] - a[1]);
+  }
+
+  function formatScores(data) {
+    return 'Emotion Scores:\n\n' + data.map(([l, s]) => `${l}: ${s.toFixed(1)}%`).join('\n');
+  }
+
+  function updatePieChart(chart, ctx, sorted) {
+    const labels = sorted.map(([l]) => l);
+    const values = sorted.map(([, s]) => s);
+    const dataset = {
+      data: values,
+      backgroundColor: labels.map(l => emotionColors[l] || getRandomColor(0.2)),
+      borderColor: '#555',
+      borderWidth: 1.5
+    };
+    const chartOptions = { responsive: true, plugins: { legend: { position: 'bottom' } } };
+
+    if (chart) {
+      chart.data.labels = labels;
+      chart.data.datasets[0] = dataset;
+      chart.update();
+      return chart;
+    }
+    return new Chart(ctx, { type: 'pie', data: { labels, datasets: [dataset] }, options: chartOptions });
+  }
+});

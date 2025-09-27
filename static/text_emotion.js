@@ -21,16 +21,16 @@ const emotionColors = {
 
 /* ---------- main ---------- */
 document.addEventListener('DOMContentLoaded', () => {
-  const textInput       = document.getElementById('text-input');
-  const analyzeBtn      = document.getElementById('analyze-btn');
+  const textInput = document.getElementById('text-input');
+  const analyzeBtn = document.getElementById('analyze-btn');
   const model1ScoresDiv = document.getElementById('model1-scores');
   const model2ScoresDiv = document.getElementById('model2-scores');
-  const ctx1            = document.getElementById('emotion-chart-1').getContext('2d');
-  const ctx2            = document.getElementById('emotion-chart-2').getContext('2d');
-  const gaugeWrap       = document.getElementById('top-emotions');
+  const ctx1 = document.getElementById('emotion-chart-1').getContext('2d');
+  const ctx2 = document.getElementById('emotion-chart-2').getContext('2d');
+  const gaugeWrap = document.getElementById('top-emotions');
   const feedbackSection = document.getElementById('feedback-section');
   const submitChoiceBtn = document.getElementById('submit-choice-btn');
-  const showGaugesBtn   = document.getElementById('show-gauges-btn');
+  const showGaugesBtn = document.getElementById('show-gauges-btn');
   const model_question = document.getElementById('question');
 
   let chart1 = null;
@@ -93,15 +93,15 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ---- Submit User's Model Choice ---- */
   submitChoiceBtn.addEventListener('click', () => {
     const selected = document.querySelector('input[name="model-choice"]:checked');
-    if (selected===null) {
+    if (selected === null) {
       alert('Please select a model before submitting.');
       return;
     }
 
     const tempChoice = selected.value;
     // ✅ Ask for confirmation
-    const confirmChoice = confirm(`Are you sure you want to select Model ${tempChoice}?`);
-    if (!confirmChoice) return;
+    // const confirmChoice = confirm(`Are you sure you want to select Model ${tempChoice}?`);
+    // if (!confirmChoice) return;
 
     // ✅ If confirmed, lock the choice
     chosenModel = tempChoice;
@@ -110,15 +110,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     //...............Sending selected model number to database.py................//
 
-    fetch('/send_feedback', {
-      method: 'POST',
-      headers: { 'Content-Type' : 'application/json'},
-      body: JSON.stringify({model: chosenModel})
-    })
+    // fetch('/send_feedback', {
+    //   method: 'POST',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({ model: chosenModel })
+    // })
 
-    .then(res => res.json())
-    .then(data => console.log("Python responded : ", data))
-    .catch(err => console.error(err))
+    //   .then(res => res.json())
+    //   .then(data => console.log("Python responded : ", data))
+    //   .catch(err => console.error(err))
 
     //...........................................................................//
 
@@ -151,43 +151,45 @@ document.addEventListener('DOMContentLoaded', () => {
     let gaugeHolders = []; // to store gauge objects
 
     dataForGauges.slice(0, 2).forEach(([lab]) => {
-    const rgb = (emotionColors[lab] || getRandomColor(0.2))
-      .match(/\((\d+),\s*(\d+),\s*(\d+)/)
-      .slice(1, 4).join(',');
-    const holder = document.createElement('div');
-    holder.style.display = 'flex';
-    holder.style.flexDirection = 'column';
-    holder.style.alignItems = 'center';
-    gaugeWrap.appendChild(holder);
+      const rgb = (emotionColors[lab] || getRandomColor(0.2))
+        .match(/\((\d+),\s*(\d+),\s*(\d+)/)
+        .slice(1, 4).join(',');
+      const holder = document.createElement('div');
+      holder.style.display = 'flex';
+      holder.style.flexDirection = 'column';
+      holder.style.alignItems = 'center';
+      gaugeWrap.appendChild(holder);
 
-    const gaugeObj = buildGauge(holder, lab, rgb); // returns { getSurity }
-    gaugeHolders.push({ label: lab, gaugeObj });
-});
+      const gaugeObj = buildGauge(holder, lab, rgb); // returns { getSurity }
+      gaugeHolders.push({ label: lab, gaugeObj });
+      showGaugesBtn.style.display = 'none';
+    });
 
-// Show submit button
-document.getElementById('submit-surity-btn').style.display = 'inline-block';
+    // Show submit button
+    document.getElementById('submit-surity-btn').style.display = 'inline-block';
 
-// Submit Surity Settings
-const submitSurityBtn = document.getElementById('submit-surity-btn');
-submitSurityBtn.addEventListener('click', () => {
-  const confirmSubmit = confirm("Are you sure you want to submit these surity settings?");
-  if(!confirmSubmit) return;
+    // Submit Surity Settings
+    const submitSurityBtn = document.getElementById('submit-surity-btn');
+    submitSurityBtn.addEventListener('click', () => {
+      const confirmSubmit = confirm("Are you sure you want to submit these surity settings?");
+      if (!confirmSubmit) return;
 
-  const surityData = gaugeHolders.map(g => ({ emotion: g.label, surity: g.gaugeObj.getSurity() }));
+      const surityData = gaugeHolders.map(g => ({ emotion: g.label, surity: g.gaugeObj.getSurity() }));
 
-  fetch('/submit_surity', {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({ model: chosenModel, surity: surityData })
-  })
-  .then(res=>res.json())
-  .then(data=>{
-    console.log("Response from Flask:", data);
-    alert("Your surity settings have been submitted!");
-    submitSurityBtn.disabled=true;
-  })
-  .catch(err=>console.error(err));
-})
+      fetch('/submit_feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: chosenModel, surity: surityData })
+      })
+        .then(res => res.json())
+        .then(data => {
+          console.log("Response from Flask:", data);
+          // alert("Your surity settings have been submitted!");
+          submitSurityBtn.disabled = true;
+        })
+        .catch(err => console.error(err));
+        submitSurityBtn.style.display = 'none';
+    })
 
   });
 

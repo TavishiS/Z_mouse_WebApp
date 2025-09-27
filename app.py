@@ -27,7 +27,7 @@ def get_certainty_label(hold_time):
 
 @app.route("/circumplex_model")
 def home():
-    return render_template("index.html")
+    return render_template("circumplex_model.html")
 
 @app.route("/process", methods=["POST"])
 def process():

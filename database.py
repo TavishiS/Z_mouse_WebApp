@@ -17,3 +17,12 @@ def insert_entry(model_no, surity):
 
     collection.insert_one(doc)
     print("Inserted entry : ", doc)
+
+
+def show_entries():
+    return list(collection.find({}, {'_id':0}))
+
+if __name__=="__main__":
+    instance = show_entries()
+    for entry in instance:
+        print(entry)

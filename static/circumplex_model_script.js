@@ -147,7 +147,7 @@ canvas.addEventListener("mouseup", () => {
   const certaintyDisplay = document.getElementById("certainty-display");
 
 
-  fetch("/process", {
+  fetch("/process_circumplex_model", {
     method: "POST",
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ angle: lockedAngle, hold_time: holdTime })

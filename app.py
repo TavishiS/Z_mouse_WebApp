@@ -3,6 +3,8 @@ from text_to_emo import get_emotion_scores_for_models
 
 app = Flask(__name__)
 
+### CIRCUMPLEX MODEL DEMONSTRATION SECTION -------------------------------------------
+
 # Emotion labels from Russell's circumplex model
 emotions = [
     "Pleased", "Glad", "Happy", "Delighted", "Excited", "Astonished", "Aroused",
@@ -29,7 +31,7 @@ def get_certainty_label(hold_time):
 def home():
     return render_template("circumplex_model.html")
 
-@app.route("/process", methods=["POST"])
+@app.route("/process_circumplex_model", methods=["POST"])
 def process():
     data = request.json
     angle = data["angle"]
@@ -42,6 +44,9 @@ def process():
         "certainty_score": score
     })
 
+### CIRCUMPLEX MODEL DEMONSTRATION SECTION END ----------------------------------
+
+### MAIN PROJECT SECTION --------------------------------------------------------
 @app.route("/")
 def text_emotion_page():
     return render_template("text_emotion.html")
@@ -54,15 +59,14 @@ def text_to_emo():
     all_results = get_emotion_scores_for_models(text)
     return jsonify(all_results)
 
-@app.route('/process_var', methods=['POST'])
-
-def process_var():
+@app.route('/send_feedback', methods=['POST'])
+def send_feedback():
     data=request.get_json()
     var=data['model']
-
     print("Number received from .js file : ", var)
     return jsonify({"message": f"Got number {var} from .js"})
 
+### MAIN PROJECT SECTION END ---------------------------------------------------------
 
 @app.route("/submit_surity", methods=["POST"])
 def submit_surity():

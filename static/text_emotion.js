@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     //...............Sending selected model number to database.py................//
 
-    fetch('/process_var', {
+    fetch('/send_feedback', {
       method: 'POST',
       headers: { 'Content-Type' : 'application/json'},
       body: JSON.stringify({model: chosenModel})

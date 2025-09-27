@@ -54,6 +54,15 @@ def text_to_emo():
     all_results = get_emotion_scores_for_models(text)
     return jsonify(all_results)
 
+@app.route('/process_var', methods=['POST'])
+
+def process_var():
+    data=request.get_json()
+    var=data['model']
+
+    print("Number received from .js file : ", var)
+    return jsonify({"message": f"Got number {var} from .js"})
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000, host="0.0.0.0", threaded=True)

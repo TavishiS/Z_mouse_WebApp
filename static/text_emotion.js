@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
   /* ---- Submit User's Model Choice ---- */
   submitChoiceBtn.addEventListener('click', () => {
     const selected = document.querySelector('input[name="model-choice"]:checked');
-    if (!selected) {
+    if (selected===null) {
       alert('Please select a model before submitting.');
       return;
     }
@@ -105,7 +105,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // ✅ If confirmed, lock the choice
     chosenModel = tempChoice;
     // alert(`You confirmed Model ${chosenModel} as your choice.`);
-    // document.createElement('div').textContent = `You confirmed Model ${chosenModel} as your choice.`;
+
+
+    //...............Sending selected model number to database.py................//
+
+    fetch('/process_var', {
+      method: 'POST',
+      headers: { 'Content-Type' : 'application/json'},
+      body: JSON.stringify({model: chosenModel})
+    })
+
+    .then(res => res.json())
+    .then(data => console.log("Python responded : ", data))
+    .catch(err => console.error(err))
+
+    //...........................................................................//
 
     // ✅ Display selected model
     const selectedModel = document.getElementById('selected-model');

@@ -39,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let analysisDataModel2 = null;
   let chosenModel = null; // store user's model selection
 
+
   /* ---- Analyze Text ---- */
   analyzeBtn.addEventListener('click', async () => {
     const text = textInput.value.trim();
@@ -147,17 +148,47 @@ document.addEventListener('DOMContentLoaded', () => {
     gaugeWrap.innerHTML = '';
 
     // Show top 2 emotions
+    let gaugeHolders = []; // to store gauge objects
+
     dataForGauges.slice(0, 2).forEach(([lab]) => {
-      const rgb = (emotionColors[lab] || getRandomColor(0.2))
-        .match(/\((\d+),\s*(\d+),\s*(\d+)/)
-        .slice(1, 4).join(',');
-      const holder = document.createElement('div');
-      holder.style.display = 'flex';
-      holder.style.flexDirection = 'column';
-      holder.style.alignItems = 'center';
-      gaugeWrap.appendChild(holder);
-      buildGauge(holder, lab, rgb);
-    });
+    const rgb = (emotionColors[lab] || getRandomColor(0.2))
+      .match(/\((\d+),\s*(\d+),\s*(\d+)/)
+      .slice(1, 4).join(',');
+    const holder = document.createElement('div');
+    holder.style.display = 'flex';
+    holder.style.flexDirection = 'column';
+    holder.style.alignItems = 'center';
+    gaugeWrap.appendChild(holder);
+
+    const gaugeObj = buildGauge(holder, lab, rgb); // returns { getSurity }
+    gaugeHolders.push({ label: lab, gaugeObj });
+});
+
+// Show submit button
+document.getElementById('submit-surity-btn').style.display = 'inline-block';
+
+// Submit Surity Settings
+const submitSurityBtn = document.getElementById('submit-surity-btn');
+submitSurityBtn.addEventListener('click', () => {
+  const confirmSubmit = confirm("Are you sure you want to submit these surity settings?");
+  if(!confirmSubmit) return;
+
+  const surityData = gaugeHolders.map(g => ({ emotion: g.label, surity: g.gaugeObj.getSurity() }));
+
+  fetch('/submit_surity', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ model: chosenModel, surity: surityData })
+  })
+  .then(res=>res.json())
+  .then(data=>{
+    console.log("Response from Flask:", data);
+    alert("Your surity settings have been submitted!");
+    submitSurityBtn.disabled=true;
+  })
+  .catch(err=>console.error(err));
+})
+
   });
 
   /* ---- Helper Functions ---- */

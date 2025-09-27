@@ -127,4 +127,9 @@ cvs.addEventListener('mouseleave', stopAdjust);
 cvs.addEventListener('contextmenu', e => e.preventDefault());
 
 draw();
+
+return {
+  getSurity: () => surity
+};
+
 }

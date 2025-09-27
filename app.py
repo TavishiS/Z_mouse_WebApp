@@ -64,5 +64,18 @@ def process_var():
     return jsonify({"message": f"Got number {var} from .js"})
 
 
+@app.route("/submit_surity", methods=["POST"])
+def submit_surity():
+    data = request.json
+    model_selected = data.get("model")
+    surity_settings = data.get("surity")  # list of dicts: [{emotion, surity}, ...]
+
+    print("Model selected:", model_selected)
+    print("Surity settings:", surity_settings)
+
+    # Later: you can forward this data to database.py
+    return jsonify({"status": "success", "message": "Surity settings received"})
+
+
 if __name__ == "__main__":
     app.run(debug=True, port=5000, host="0.0.0.0", threaded=True)

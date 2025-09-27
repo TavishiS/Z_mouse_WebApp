@@ -1,9 +1,4 @@
-/*
-Canvas gauge that can be adjusted with left/right clicks.
-The color lightness/darkness is based on the surity percentage.
-*/
-
-// Helper to convert RGB color string to HSL
+// Helper to convert an RGB color string to an HSL array
 function rgbToHsl(rgbString) {
   const [r, g, b] = rgbString.split(',').map(Number);
   const r_norm = r / 255;
@@ -30,106 +25,78 @@ function rgbToHsl(rgbString) {
 
 export function buildGauge(container, label, baseRGB) {
   const SIZE = 140;
-  const cvs = Object.assign(document.createElement('canvas'), {
-    width: SIZE,
-    height: SIZE
-  });
-  const ctx = cvs.getContext('2d');
-  container.appendChild(cvs);
+  const canvas = document.createElement('canvas');
+  canvas.width = SIZE;
+  canvas.height = SIZE;
+  const ctx = canvas.getContext('2d');
+  container.appendChild(canvas);
 
-  const cap = document.createElement('div');
-  cap.textContent = label;
-  cap.style.textAlign = 'center';
-  cap.style.marginTop = '6px';
-  container.appendChild(cap);
+  const caption = document.createElement('div');
+  caption.textContent = label;
+  caption.style.textAlign = 'center';
+  caption.style.marginTop = '6px';
+  container.appendChild(caption);
 
   let surity = 100;
+  let intervalId = null;
   const [hue, initialSaturation] = rgbToHsl(baseRGB);
-
-  // Ensure a minimum saturation to avoid pure grey, unless it's a truly achromatic color
-  const saturation = Math.max(initialSaturation, 30); // Minimum 30% saturation
+  const saturation = Math.max(initialSaturation, 30); // Ensure a minimum saturation
 
   function draw() {
-    const deg = surity * 3.6;
-    // Adjust lightness range: 50 (surity 100) to 90 (surity 0)
-    const currentLightness = 100 - (surity / 100) * 40;
+    const angle = surity * 3.6;
+    const lightness = 100 - (surity / 100) * 40; // Adjusts from 100% down to 60%
 
     ctx.clearRect(0, 0, SIZE, SIZE);
     ctx.lineWidth = 16;
 
-    // Background ring (unfilled part) - slightly lighter than the currentLightness
-    const backgroundLightness = Math.min(100, currentLightness + 10); // Max 95% lightness
-    ctx.strokeStyle = `hsl(${hue}, ${saturation}%, ${backgroundLightness}%)`;
+    // Background ring
+    ctx.strokeStyle = `hsl(${hue}, ${saturation}%, ${Math.min(100, lightness + 10)}%)`;
     ctx.beginPath();
     ctx.arc(SIZE / 2, SIZE / 2, SIZE / 2 - 10, 0, 2 * Math.PI);
     ctx.stroke();
 
-    // Foreground (surity) ring (filled part)
-    if (deg > 0) {
-      ctx.strokeStyle = `hsl(${hue}, ${saturation}%, ${currentLightness-30}%)`;
+    // Foreground (surity) ring
+    if (angle > 0) {
+      ctx.strokeStyle = `hsl(${hue}, ${saturation}%, ${lightness - 30}%)`;
       ctx.beginPath();
-      ctx.arc(SIZE / 2, SIZE / 2, SIZE / 2 - 10, -Math.PI / 2, -Math.PI / 2 + deg * Math.PI / 180);
+      ctx.arc(SIZE / 2, SIZE / 2, SIZE / 2 - 10, -Math.PI / 2, -Math.PI / 2 + angle * Math.PI / 180);
       ctx.stroke();
     }
 
-    // Text color - ensure it's always readable and not too dark
-    const textColorLightness = Math.max(20, currentLightness - 40); // Min 20% lightness
-    ctx.fillStyle = `hsl(${hue}, ${saturation}%, ${textColorLightness}%)`;
+    // Text inside the gauge
+    ctx.fillStyle = `hsl(${hue}, ${saturation}%, ${Math.max(20, lightness - 40)}%)`;
     ctx.font = '600 18px system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(`${surity}%`, SIZE / 2, SIZE / 2);
   }
 
-
-  //..........mouse hold instead of click......... */
-  let intervalId = null;   // will hold our repeating timer
-
-function startAdjust(direction) {
-  // direction: -1 for decrease, +1 for increase
-  if (intervalId) return;  // already running
-  intervalId = setInterval(() => {
-    if (direction === -1) {
-      surity = Math.max(0, surity - 1); // decrease slowly
-    } else {
-      surity = Math.min(100, surity + 1); // increase slowly
-    }
-    draw();
-  }, 50); // adjust speed (50 ms = 20 steps/sec)
-}
-
-function stopAdjust() {
-  clearInterval(intervalId);
-  intervalId = null;
-}
-
-// Left mouse hold → decrease
-cvs.addEventListener('mousedown', e => {
-  if (e.button === 0) {          // 0 = left button
-    e.preventDefault();
-    startAdjust(-1);
+  function startAdjust(direction) {
+    if (intervalId) return; // Prevent multiple intervals
+    intervalId = setInterval(() => {
+      surity = Math.max(0, Math.min(100, surity + direction));
+      draw();
+    }, 50);
   }
-});
 
-// Right mouse hold → increase
-cvs.addEventListener('mousedown', e => {
-  if (e.button === 2) {          // 2 = right button
-    e.preventDefault();
-    startAdjust(1);
+  function stopAdjust() {
+    clearInterval(intervalId);
+    intervalId = null;
   }
-});
 
-// Stop on mouseup or when pointer leaves canvas
-cvs.addEventListener('mouseup', stopAdjust);
-cvs.addEventListener('mouseleave', stopAdjust);
+  canvas.addEventListener('mousedown', e => {
+    e.preventDefault();
+    if (e.button === 0) startAdjust(-1); // Left-click: decrease
+    if (e.button === 2) startAdjust(1);  // Right-click: increase
+  });
+  
+  canvas.addEventListener('mouseup', stopAdjust);
+  canvas.addEventListener('mouseleave', stopAdjust);
+  canvas.addEventListener('contextmenu', e => e.preventDefault());
 
-// Prevent context menu on right-click
-cvs.addEventListener('contextmenu', e => e.preventDefault());
+  draw(); // Initial draw
 
-draw();
-
-return {
-  getSurity: () => surity
-};
-
+  return {
+    getSurity: () => surity
+  };
 }

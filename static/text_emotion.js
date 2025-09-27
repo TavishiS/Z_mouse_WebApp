@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
       model2ScoresDiv.textContent = '';
       return;
     }
-
+    document.getElementById('charts-container').style.display=''
     // Reset UI
     model1ScoresDiv.textContent = 'Analyzing…';
     model2ScoresDiv.textContent = 'Analyzing…';

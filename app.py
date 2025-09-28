@@ -1,8 +1,7 @@
 from flask import Flask, request, jsonify, render_template
 from text_to_emo import get_emotion_scores_for_models
 import database
-import os
-os.environ['PORT'] = '5000'
+
 app = Flask(__name__)
 
 ### CIRCUMPLEX MODEL DEMONSTRATION SECTION -------------------------------------------
@@ -81,5 +80,4 @@ def submit_feedback():
 
 
 if __name__ == "__main__":
-    envport = int(os.environ.get("PORT", 5000))
-    app.run(debug=True, port=envport, host="0.0.0.0", threaded=True)
+    app.run(debug=True, port=5000, host="0.0.0.0", threaded=True)

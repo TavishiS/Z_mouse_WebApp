@@ -1,6 +1,25 @@
 from pymongo import MongoClient
+import socket
 
-client = MongoClient("mongodb+srv://TavishiS:Abcd%2A1234@users.wlgnv.mongodb.net/")
+def is_internet_available():
+    """Checks for a live internet connection by connecting to a reliable host."""
+    try:
+        socket.create_connection(("8.8.8.8", 53), timeout=3)
+        return True
+    except OSError:
+        return False
+    
+if is_internet_available() :
+    client = MongoClient("mongodb+srv://TavishiS:Abcd%2A1234@users.wlgnv.mongodb.net/")
+    print("Connected with remote database")
+else :
+    try :
+        client=MongoClient("mongodb://localhost:27017/", serverSelectionTimeoutMS=2000)
+        client.admin.command('ping')
+        print("Connected with local database")
+    except :
+        print("Failed to connect with remote and local database")
+        exit()
 
 db = client['Users']
 collection = db['models']

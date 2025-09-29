@@ -29,9 +29,6 @@ except:
         client = None # Ensure client is None
         exit() # Exit the script as no database is available
 
-if client:
-    print("\nDatabase client is ready to use.")
-
 
 db = client['Users']
 collection = db['models']

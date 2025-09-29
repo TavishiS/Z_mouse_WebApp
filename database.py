@@ -1,25 +1,37 @@
 from pymongo import MongoClient
-import socket
 
-def is_internet_available():
-    """Checks for a live internet connection by connecting to a reliable host."""
-    try:
-        socket.create_connection(("8.8.8.8", 53), timeout=3)
-        return True
-    except OSError:
-        return False
+client = None
+
+REMOTE_URI = "mongodb+srv://TavishiS:Abcd%2A1234@users.wlgnv.mongodb.net/"
+LOCAL_URI = "mongodb://localhost:27017/"
+
+# try connecting to the preferred remote database
+try:
+    # Set a timeout to avoid waiting too long if the remote server is unreachable
+    client = MongoClient(REMOTE_URI, serverSelectionTimeoutMS=5000)
+    # The ping command is to establish connection as client is lazy initially
+    client.admin.command('ping')
+    print("✅ Connected successfully to the remote database.")
+
+# try the local database
+except:
+    print(f"⚠️ Could not connect to remote database")
+    print("Attempting to connect to the local database instead...")
     
-if is_internet_available() :
-    client = MongoClient("mongodb+srv://TavishiS:Abcd%2A1234@users.wlgnv.mongodb.net/")
-    print("Connected with remote database")
-else :
-    try :
-        client=MongoClient("mongodb://localhost:27017/", serverSelectionTimeoutMS=2000)
+    try:
+        client = MongoClient(LOCAL_URI, serverSelectionTimeoutMS=2000)
         client.admin.command('ping')
-        print("Connected with local database")
-    except :
-        print("Failed to connect with remote and local database")
-        exit()
+        print("✅ Connected successfully to the local database.")
+    
+    # 3. If the local connection also fails, print an error and exit
+    except:
+        print(f"❌ Failed to connect to both remote and local databases")
+        client = None # Ensure client is None
+        exit() # Exit the script as no database is available
+
+if client:
+    print("\nDatabase client is ready to use.")
+
 
 db = client['Users']
 collection = db['models']

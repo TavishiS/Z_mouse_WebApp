@@ -67,10 +67,10 @@ def text_to_emo():
 def submit_feedback():
     data = request.json
     model_selected = data.get("model")
-    surity_settings = data.get("surity")  # list of dicts: [{emotion, surity}, ...]
+    surity_settings = data.get("surety")  # list of dicts: [{emotion, surety}, ...]
 
     print("Model selected:", model_selected)
-    print("Surity settings:", surity_settings)
+    print("surety settings:", surity_settings)
 
     try:
         database.insert_entry(model_selected, surity_settings)

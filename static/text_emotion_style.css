@@ -161,7 +161,7 @@ button:hover {
   margin-top: 30px;
 }
 
-#submit-surity-btn {
+#submit-surety-btn {
   background-image: linear-gradient(45deg, var(--secondary-color) 0%, #20bf6b 100%);
   max-width: 300px;
   margin: 20px auto 0;

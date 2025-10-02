@@ -33,14 +33,14 @@ except:
 db = client['Users']
 collection = db['models']
 
-def insert_entry(model_no, surity):
-    if not model_no or not surity or len(surity)<2:
+def insert_entry(model_no, surety):
+    if not model_no or not surety or len(surety)<2:
         raise ValueError("Invalid data for MongoDB insertion")
     
     doc = {
         "model" : model_no,
-        surity[0]['emotion'] : surity[0]['surity'],
-        surity[1]['emotion'] : surity[1]['surity']
+        surety[0]['emotion'] : surety[0]['surety'],
+        surety[1]['emotion'] : surety[1]['surety']
     }
 
     collection.insert_one(doc)
@@ -81,16 +81,16 @@ if __name__=="__main__":
 
     print("\nTotal number of entries = ", len(instance), "\n")
 
-    choice = input("Want to see avarage surity of all emotions for a particular model? (y/n) : ")
+    choice = input("Want to see average surety of all emotions for a particular model? (y/n) : ")
 
     if choice in ['Y', 'y']:
         mn=input("Enter model number : ")
         if mn == '1' or mn == '2':
             avg = compute_avg(mn)
             # print(type(avg))
-            print("\n*** Average surity for all emotions by model-",mn,"***\n")
-            for emo, surity in avg.items():
-                print(emo, " : ", surity, " %")
+            print("\n*** Average surety for all emotions by model-",mn,"***\n")
+            for emo, surety in avg.items():
+                print(emo, " : ", surety, " %")
         else:
             print("Invalid model number entered...(model = 1 or 2)")
 

@@ -37,14 +37,14 @@ export function buildGauge(container, label, baseRGB) {
   caption.style.marginTop = '6px';
   container.appendChild(caption);
 
-  let surity = 100;
+  let surety = 100;
   let intervalId = null;
   const [hue, initialSaturation] = rgbToHsl(baseRGB);
   const saturation = Math.max(initialSaturation, 30); // Ensure a minimum saturation
 
   function draw() {
-    const angle = surity * 3.6;
-    const lightness = 100 - (surity / 100) * 40; // Adjusts from 100% down to 60%
+    const angle = surety * 3.6;
+    const lightness = 100 - (surety / 100) * 40; // Adjusts from 100% down to 60%
 
     ctx.clearRect(0, 0, SIZE, SIZE);
     ctx.lineWidth = 16;
@@ -55,7 +55,7 @@ export function buildGauge(container, label, baseRGB) {
     ctx.arc(SIZE / 2, SIZE / 2, SIZE / 2 - 10, 0, 2 * Math.PI);
     ctx.stroke();
 
-    // Foreground (surity) ring
+    // Foreground (surety) ring
     if (angle > 0) {
       ctx.strokeStyle = `hsl(${hue}, ${saturation}%, ${lightness - 30}%)`;
       ctx.beginPath();
@@ -68,13 +68,13 @@ export function buildGauge(container, label, baseRGB) {
     ctx.font = '600 18px system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(`${surity}%`, SIZE / 2, SIZE / 2);
+    ctx.fillText(`${surety}%`, SIZE / 2, SIZE / 2);
   }
 
   function startAdjust(direction) {
     if (intervalId) return; // Prevent multiple intervals
     intervalId = setInterval(() => {
-      surity = Math.max(0, Math.min(100, surity + direction));
+      surety = Math.max(0, Math.min(100, surety + direction));
       draw();
     }, 50);
   }
@@ -97,6 +97,6 @@ export function buildGauge(container, label, baseRGB) {
   draw(); // Initial draw
 
   return {
-    getSurity: () => surity
+    getSurity: () => surety
   };
 }

@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const questionH3 = document.getElementById('question');
   const showGaugesBtn = document.getElementById('show-gauges-btn');
   const gaugeWrap = document.getElementById('top-emotions');
-  const submitSurityBtn = document.getElementById('submit-surity-btn');
+  const submitSurityBtn = document.getElementById('submit-surety-btn');
   const thankYouMsg = document.getElementById('thank-you-msg');
 
   // State variables
@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
     showGaugesBtn.click(); // Automatically trigger gauge creation
   });
 
-  // ---- Event Listener for Showing Surity Gauges ----
+  // ---- Event Listener for Showing surety Gauges ----
   showGaugesBtn.addEventListener('click', () => {
     if (!chosenModel) {
       alert('Please submit your model choice first.');
@@ -136,19 +136,19 @@ document.addEventListener('DOMContentLoaded', () => {
     submitSurityBtn.style.display = 'block';
   });
 
-  // ---- Event Listener for Final Surity Submission ----
+  // ---- Event Listener for Final surety Submission ----
   submitSurityBtn.addEventListener('click', () => {
-    if (!confirm("Are you sure you want to submit these surity settings?")) return;
+    if (!confirm("Are you sure you want to submit these surety settings?")) return;
 
     const surityData = gaugeHolders.map(g => ({
       emotion: g.label,
-      surity: g.gaugeObj.getSurity()
+      surety: g.gaugeObj.getSurity()
     }));
 
     fetch('/submit_feedback', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: chosenModel, surity: surityData })
+      body: JSON.stringify({ model: chosenModel, surety: surityData })
     })
     .then(res => res.json())
     .then(data => {

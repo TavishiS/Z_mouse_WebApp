@@ -52,19 +52,19 @@ function drawMeter(angle) {
   }
 
   // Draw axis labels
-  ctx.font = "bold 18px 'Quicksand', sans-serif";
+  ctx.font = "bold 14px 'Quicksand', sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
   
   // Pleasure-Arousal labels
   ctx.fillStyle = "#4caf50";
-  ctx.fillText("High Pleasure", cx + r * 0.8, cy);
-  ctx.fillText("Low Pleasure", cx - r * 0.8, cy);
-  ctx.fillText("High Arousal", cx, cy - r * 0.8);
-  ctx.fillText("Low Arousal", cx, cy + r * 0.8);
+  ctx.fillText("High Pleasure", cx + r * 0.5, cy);
+  ctx.fillText("Low Pleasure", cx - r * 0.5, cy);
+  ctx.fillText("High Arousal", cx, cy - r * 0.5);
+  ctx.fillText("Low Arousal", cx, cy + r * 0.5);
 
   // Emotion labels
-  ctx.font = "14px 'Poppins', sans-serif";
+  ctx.font = "bold 10px 'Poppins', sans-serif";
   ctx.fillStyle = "#333";
   
   emotionMap.forEach(([emotion, ang]) => {
@@ -79,7 +79,7 @@ function drawMeter(angle) {
     
     if (minAngleDiff < 15) {
       ctx.fillStyle = "#6a11cb";
-      ctx.font = "bold 15px 'Poppins', sans-serif";
+      ctx.font = "bold 10px 'Poppins', sans-serif";
     } else {
       ctx.fillStyle = "#555";
     }
